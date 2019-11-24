@@ -40,24 +40,35 @@ done
 
 ver="$(pandoc --version | head -n1 | grep -Eo '[0-9.]+')"
 
-{
-printf '%.0s#' {1..72}; echo
-lsb_release -a
+cat << EOF |
+# OS
 
-printf '%.0s#' {1..72}; echo
-ghc --version
+$(lsb_release -a 2> /dev/null)
 
-printf '%.0s-' {1..72}; echo
-cabal --version
+# Environment
 
-printf '%.0s#' {1..72}; echo
-pandoc --version
+## GHC
 
-printf '%.0s-' {1..72}; echo
-pandoc-citeproc --version
+$(ghc --version)
 
-printf '%.0s#' {1..72}; echo
-} 2> /dev/null | github-release \
+## Cabal
+
+$(cabal --version)
+
+# Pandoc
+
+## Version
+
+$(pandoc --version | head -n2)
+$(pandoc-citeproc --version)
+
+## Checksum
+
+
+    $(sha256sum "$(command -v pandoc)")
+    $(sha256sum "$(command -v pandoc-citeproc)")
+EOF
+github-release \
     release -u ickc -r pandoc-arm -t "v$ver" -n "pandoc $ver" -d -
 
 for filename in pandoc pandoc-citeproc; do
